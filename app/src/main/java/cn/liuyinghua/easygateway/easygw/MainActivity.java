@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         final long startTime = System.nanoTime();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String URL = "http://192.168.1.1/api";
+        String URL = "https://192.168.1.1/api";
 
         String body = new String("{\n" +
                 "  \"command\":\"get\",\n" +
@@ -294,6 +294,21 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    // json is the json object that includes parameters, due to the fact
+    // that the parameters includes 2 memeber:
+    //  1. value => real value of the parameter
+    //  2. type => type of the parameter
+    public String getJsonParamValue(JSONObject jsonObj, String strParam) {
+        String strVal = null;
+        try {
+            JSONObject jsonSubOjb = jsonObj.getJSONObject(strParam);
+            strVal = jsonSubOjb.getString("value");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return strVal;
+    }
+
     //result is the returned response
     public String getHostFromResponse(String result) {
         //rpc.hosts.HostNumberOfEntries => max hosts
@@ -307,36 +322,29 @@ public class MainActivity extends AppCompatActivity {
         jsonMapHostName.clear();
 
         //Assume we have max  255 hosts
-        for (int i = 0; i < 50; i++) {
+        //The problem here is that the host.i is not sequential, so we need construct every possible
+        //host rpc string and try to find it in the result string (which is a big json string)
+        for (int i = 0; i < 255; i++) {
             String rpcHostPath = String.format("rpc.hosts.host.%d.", i);
+            if(result.contains(rpcHostPath) != true)
+                continue;
+            Log.d("HOST", "Find host " + rpcHostPath + "in the result string");
             JSONObject jsonObj = getJsonFromResponse(result, rpcHostPath);
             if (jsonObj != null) {
-                // return json obj
                 String strState = null;
-                try {
-                    strState = jsonObj.getString("State");
-                    if (strState.equals("0"))
-                        continue;
-                    //State = 1, this is an active host
-
-                    JSONObject jsonHostFriendlyName = jsonObj.getJSONObject("FriendlyName");
-                    String strHostFriendlyName = jsonHostFriendlyName.getString("value");
-
-                    JSONObject jsonIPAddress = jsonObj.getJSONObject("IPAddress");
-                    String strIP = jsonIPAddress.getString("value");
-
-                    strHostInfo += strHostFriendlyName + " : " + strIP + "\n";
-                    //for displaying in diaglog
-                    strHostName.put(strHostFriendlyName, rpcHostPath);
-                    jsonMapHostName.put(strHostFriendlyName, jsonObj);
-                    arHostName.add(strHostFriendlyName);
-                    if (activeHost++ >= hostNum)
-                        break;
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("EasyGateway", "Cannot create json object " + e.getMessage());
-                }
-
+                strState = getJsonParamValue(jsonObj, "State");
+                if (strState.equals("0"))
+                    continue;
+                //State = 1, this is an active host
+                String strHostFriendlyName = getJsonParamValue(jsonObj, "FriendlyName");
+                String strIP = getJsonParamValue(jsonObj, "IPAddress");
+                strHostInfo += strHostFriendlyName + "     :     " + strIP + "\n";
+                //for displaying in diaglog
+                strHostName.put(strHostFriendlyName, rpcHostPath);
+                jsonMapHostName.put(strHostFriendlyName, jsonObj);
+                arHostName.add(strHostFriendlyName);
+                if (activeHost++ >= hostNum)
+                    break;
             }
         }
         TextView tvHosts = (TextView) findViewById(R.id.tvHostInfo);
@@ -366,6 +374,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this,
                         "你点击了" + items[which],
                         Toast.LENGTH_SHORT).show();
+                JSONObject jsonHost = jsonMapHostName.get(items[which]);
             }
         });
         listDialog.show();
