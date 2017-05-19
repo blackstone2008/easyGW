@@ -15,7 +15,7 @@
     tools:showIn="@layout/activity_main">
 
     <TextView
-        android:id="@+id/section_label"
+        android:id="@+id/tvProductName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Summary"
@@ -31,7 +31,7 @@
             android:id="@+id/btRefresh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Refresh Datea"
+            android:contentDescription="Refresh Data"
             android:onClick="OnRefreshData"
             android:text="Refresh"
             android:visibility="visible"
@@ -41,10 +41,19 @@
             android:id="@+id/btHostInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:contentDescription="Refresh Datea"
+            android:contentDescription="HostInfo"
             android:text="Hosts"
             android:visibility="visible"
             tools:text="Hosts" />
+
+        <Button
+            android:id="@+id/btLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Login"
+            android:text="Login"
+            android:visibility="visible"
+            tools:text="Login" />
 
 
     </LinearLayout>
@@ -91,4 +100,9 @@
         android:layout_height="wrap_content"
         android:text="Hosts" />
 
+    <TextView
+        android:id="@+id/tvWanIP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WAN IP" />
 </LinearLayout>

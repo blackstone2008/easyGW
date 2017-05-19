@@ -1,16 +1,20 @@
 package cn.liuyinghua.easygateway.easygw;
 
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -21,6 +25,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import android.content.DialogInterface;
 
@@ -41,12 +49,24 @@ public class MainActivity extends AppCompatActivity {
     Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
     Map<String, String> strHostName = new HashMap<String, String>();
     List<String> arHostName = new ArrayList<String>();
+    // default token in header, it is used as key for authentication a session
+    static String strTokenInHeader = "";
+    // is gateway can be connected or not, use the Token defined above
+    boolean isConnected = false;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (isConnected == false)
+            toolbar.setBackgroundColor(Color.GRAY);
+        toolbar.setTitle("Gateway not connected");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -67,10 +87,12 @@ public class MainActivity extends AppCompatActivity {
                 final String uciSSID = "uci.wireless.wifi-iface.@wl0.ssid";
                 final String rpcUpTime = "rpc.system.uptime";
                 final String rpcHosts = "rpc.hosts.";
+                final String rpcWan = "rpc.network.interface.@wan.";
                 //Very important for multiple commands in one rpc
                 final String connector = "\"" + ",\n" + "\"";
                 //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                String cmd = uciSSID + connector + rpcUpTime + connector + uciEnv + connector + rpcHosts;
+                String cmd = uciSSID + connector + rpcUpTime + connector
+                        + uciEnv + connector + rpcHosts + connector + rpcWan;
                 //final String cmd = uciProdName;
                 //connectGatewayWithCommand(cmd);
 
@@ -81,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
                         String strHwVersion = getRetValueFromResponse(result, uciEnv, "hardware_version");
                         String strSSID = getRetValueFromResponse(result, uciSSID);
                         String strUpTime = getRetValueFromResponse(result, rpcUpTime);
+                        String strWANIP = getRetValueFromResponse(result, rpcWan, "ipaddr");
+                        Log.d("LIUYH", result);
+                        Log.d("LIUYH", "wan ip is " + strWANIP);
 
                         int uptime = Integer.parseInt(strUpTime);
                         TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
@@ -91,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
                         tvSSID.setText("SSID: " + strSSID);
                         TextView tvUpTime = (TextView) findViewById(R.id.tvUpTime);
                         tvUpTime.setText("UpTime:" + (uptime / 3600) + "hours " + (uptime % 3600) / 60 + "minutes " + uptime % 60 + "seconds");
+                        TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);
+                        tvWanIP.setText("WAN IP: " + strWANIP);
                         getHostFromResponse(result);
                     }
                 });
@@ -106,6 +133,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btLogin = (Button) findViewById(R.id.btLogin);
+        btLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                authDialog();
+            }
+        });
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
@@ -125,6 +163,10 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Toast.makeText(MainActivity.this,
+                    "SETTNIG",
+                    Toast.LENGTH_SHORT).show();
+            authDialog();
             return true;
         }
 
@@ -270,7 +312,8 @@ public class MainActivity extends AppCompatActivity {
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
                 params.put("Content-Type", "application/x-www-form-urlencoded");
-                params.put("X-tch-token", "123456");
+                // token is the password for authentication
+                params.put("X-tch-token", strTokenInHeader);
                 return params;
             }
 
@@ -327,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
         //host rpc string and try to find it in the result string (which is a big json string)
         for (int i = 0; i < 255; i++) {
             String rpcHostPath = String.format("rpc.hosts.host.%d.", i);
-            if(result.contains(rpcHostPath) != true)
+            if (result.contains(rpcHostPath) != true)
                 continue;
             Log.d("HOST", "Find host " + rpcHostPath + "in the result string");
             JSONObject jsonObj = getJsonFromResponse(result, rpcHostPath);
@@ -368,7 +411,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(MainActivity.this);
         listDialog.setTitle(/*size + */"Active Hosts Information");
-        listDialog.setItems(arHostName.toArray(new String [arHostName.size()]), new DialogInterface.OnClickListener() {
+        listDialog.setItems(arHostName.toArray(new String[arHostName.size()]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // which 下标从0开始
@@ -392,12 +435,95 @@ public class MainActivity extends AppCompatActivity {
         String strIP = getJsonParamValue(jsonHost, "IPAddress");
         //Connection time is in second
         int connTime = Integer.parseInt(getJsonParamValue(jsonHost, "ConnectedTime"));
-        String strConnTime = connTime/3600 + " Hours " + connTime%3600/60 + " Minutes " + connTime%60 + "Seconds ";
+        String strConnTime = connTime / 3600 + " Hours " + connTime % 3600 / 60 + " Minutes " + connTime % 60 + "Seconds ";
 
         hostDialog.show();
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
+
     public interface VolleyCallback {
         void onSuccess(String result);
+    }
+
+    public void authDialog() {
+    /*@setView 装入一个EditView
+     */
+        final EditText editText = new EditText(MainActivity.this);
+        editText.setText(strTokenInHeader);
+        editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        AlertDialog.Builder inputDialog = new AlertDialog.Builder(MainActivity.this);
+        inputDialog.setTitle("Input Password").setView(editText);
+
+        inputDialog.setPositiveButton("Connect",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String uciEnv = "uci.env.var.prod_friendly_name";
+                        final String rpcWan = "rpc.network.interface.@wan.ipaddr";
+                        //Very important for multiple commands in one rpc
+                        final String connector = "\"" + ",\n" + "\"";
+                        //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
+                        String cmd = uciEnv;
+                        // Set password to x-tch-header
+                        strTokenInHeader = editText.getText().toString();
+                        //final String cmd = uciProdName;
+                        //connectGatewayWithCommand(cmd);
+
+                        getStringFromGateway(cmd, new VolleyCallback() {
+                            @Override
+                            public void onSuccess(String result) {
+                                isConnected = true;
+                                String strProdName = getRetValueFromResponse(result, uciEnv);
+                                String strWanIP = getRetValueFromResponse(result, rpcWan);
+
+                                TextView tvProd = (TextView) findViewById(R.id.tvProductName);
+                                TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);
+                                tvWanIP.setText(strWanIP);
+
+                                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                                toolbar.setTitle(tvProd + " connected");
+                                toolbar.setLogo(R.drawable.common_full_open_on_phone);
+                                toolbar.setBackgroundColor(Color.GREEN);
+
+                            }
+                        });
+
+                    }
+                }).show();
     }
 }
