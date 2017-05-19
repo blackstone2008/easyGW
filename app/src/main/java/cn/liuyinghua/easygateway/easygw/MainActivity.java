@@ -298,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
     // that the parameters includes 2 memeber:
     //  1. value => real value of the parameter
     //  2. type => type of the parameter
+    // (firstly used when getting paramters value from hosts, so many parameters:(
     public String getJsonParamValue(JSONObject jsonObj, String strParam) {
         String strVal = null;
         try {
@@ -360,24 +361,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showListDialog() {
-        int size = arHostName.size();
-        final String[] items = (String[]) arHostName.toArray(new String[size]);
+        //List<String> arHostName => how to convert it to a String
+        //int size = arHostName.size();
+        //final String[] items = (String[]) arHostName.toArray(new String[size]);
+
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(MainActivity.this);
-        listDialog.setTitle(size + "Active Hosts Information");
-        listDialog.setItems(items, new DialogInterface.OnClickListener() {
+        listDialog.setTitle(/*size + */"Active Hosts Information");
+        listDialog.setItems(arHostName.toArray(new String [arHostName.size()]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // which 下标从0开始
                 // ...To-do
                 //jsonMapHostName.put(strHostFriendlyName, jsonObj);  => here we can get the jsonObject of host and display all information.
-                Toast.makeText(MainActivity.this,
-                        "你点击了" + items[which],
-                        Toast.LENGTH_SHORT).show();
-                JSONObject jsonHost = jsonMapHostName.get(items[which]);
+                //Toast.makeText(MainActivity.this,"你点击了" + items[which],Toast.LENGTH_SHORT).show();
+
+                JSONObject jsonHost = jsonMapHostName.get(arHostName.get(which));
+                showHostDialog(jsonHost);
             }
         });
         listDialog.show();
+    }
+
+    public void showHostDialog(JSONObject jsonHost) {
+        AlertDialog.Builder hostDialog = new AlertDialog.Builder(MainActivity.this);
+        hostDialog.setTitle(getJsonParamValue(jsonHost, "FriendlyName"));
+        String strLayer2Type = getJsonParamValue(jsonHost, "FriendlyName");
+        String strConnectionType = strLayer2Type.contains("wl") ? "Wi-Fi" : "Ethernet";
+        strConnectionType = strLayer2Type.equals("wl0") ? "2.4G Wi-Fi" : "5G Wi-Fi";
+        String strIP = getJsonParamValue(jsonHost, "IPAddress");
+        //Connection time is in second
+        int connTime = Integer.parseInt(getJsonParamValue(jsonHost, "ConnectedTime"));
+        String strConnTime = connTime/3600 + " Hours " + connTime%3600/60 + " Minutes " + connTime%60 + "Seconds ";
+
+        hostDialog.show();
     }
 
     public interface VolleyCallback {
