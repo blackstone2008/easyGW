@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     static String strTokenInHeader = "";
     // is gateway can be connected or not, use the Token defined above
     boolean isConnected = false;
+    static final String URL = "http://192.168.1.1/api";
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -275,7 +276,7 @@ public class MainActivity extends AppCompatActivity {
         final long startTime = System.nanoTime();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
-        String URL = "https://192.168.1.1/api";
+
 
         String body = new String("{\n" +
                 "  \"command\":\"get\",\n" +
@@ -405,13 +406,13 @@ public class MainActivity extends AppCompatActivity {
 
     public void showListDialog() {
         //List<String> arHostName => how to convert it to a String
-        //int size = arHostName.size();
+        int size = arHostName.size();
         //final String[] items = (String[]) arHostName.toArray(new String[size]);
 
         AlertDialog.Builder listDialog =
                 new AlertDialog.Builder(MainActivity.this);
-        listDialog.setTitle(/*size + */"Active Hosts Information");
-        listDialog.setItems(arHostName.toArray(new String[arHostName.size()]), new DialogInterface.OnClickListener() {
+        listDialog.setTitle(size + "Active Hosts Information");
+        listDialog.setItems(arHostName.toArray(new String[size]), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // which 下标从0开始
@@ -431,11 +432,20 @@ public class MainActivity extends AppCompatActivity {
         hostDialog.setTitle(getJsonParamValue(jsonHost, "FriendlyName"));
         String strLayer2Type = getJsonParamValue(jsonHost, "FriendlyName");
         String strConnectionType = strLayer2Type.contains("wl") ? "Wi-Fi" : "Ethernet";
-        strConnectionType = strLayer2Type.equals("wl0") ? "2.4G Wi-Fi" : "5G Wi-Fi";
-        String strIP = getJsonParamValue(jsonHost, "IPAddress");
+        strConnectionType = "Connection Mode: " + (strLayer2Type.equals("wl0") ? "2.4G Wi-Fi" : "5G Wi-Fi");
+        String strIP = "IP Address: " + getJsonParamValue(jsonHost, "IPAddress");
         //Connection time is in second
         int connTime = Integer.parseInt(getJsonParamValue(jsonHost, "ConnectedTime"));
-        String strConnTime = connTime / 3600 + " Hours " + connTime % 3600 / 60 + " Minutes " + connTime % 60 + "Seconds ";
+        String strConnTime = "Connection Time: " +  connTime/3600 + " Hours " + connTime%3600/60
+                + " Minutes " + connTime%60 + "Seconds ";
+        final String[] items = {strConnectionType, strIP, strIP};
+
+        hostDialog.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this,"CLICK: " + items[which],Toast.LENGTH_SHORT).show();
+            }
+        });
 
         hostDialog.show();
     }
