@@ -47,11 +47,11 @@
             tools:text="Hosts" />
 
         <Button
-            android:id="@+id/btLogin"
+            android:id="@+id/btWiFiPower"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="Login"
-            android:text="Login"
+            android:text="WiFi Power"
             android:visibility="visible"
             tools:text="Login" />
 

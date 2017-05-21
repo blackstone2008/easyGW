@@ -92,12 +92,10 @@ public class MainActivity extends AppCompatActivity {
                 //Very important for multiple commands in one rpc
                 final String connector = "\"" + ",\n" + "\"";
                 //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                String cmd = uciSSID + connector + rpcUpTime + connector
-                        + uciEnv + connector + rpcHosts + connector + rpcWan;
-                //final String cmd = uciProdName;
-                //connectGatewayWithCommand(cmd);
+                String cmd = "\"" + uciSSID + connector + rpcUpTime + connector
+                        + uciEnv + connector + rpcHosts + connector + rpcWan + "\",";
 
-                getStringFromGateway(cmd, new VolleyCallback() {
+                connectGatewayWithCommand("get", cmd, new VolleyCallback() {
                     @Override
                     public void onSuccess(String result) {
                         String strProdName = getRetValueFromResponse(result, uciEnv, "prod_friendly_name");
@@ -105,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
                         String strSSID = getRetValueFromResponse(result, uciSSID);
                         String strUpTime = getRetValueFromResponse(result, rpcUpTime);
                         String strWANIP = getRetValueFromResponse(result, rpcWan, "ipaddr");
-                        Log.d("LIUYH", result);
-                        Log.d("LIUYH", "wan ip is " + strWANIP);
+                        // Log.d("LIUYH", result);
+                        // Log.d("LIUYH", "wan ip is " + strWANIP);
 
                         int uptime = Integer.parseInt(strUpTime);
                         TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
@@ -134,6 +132,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btWiFiPower = (Button) findViewById(R.id.btWiFiPower);
+        btWiFiPower.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String strCmdTxPower = constructSetCommandString(
+                        "uci.wireless.wifi-device.@radio_2G.tx_power_adjust", "+2");
+                String strCmdOverrideRegulartory = constructSetCommandString(
+                        "uci.wireless.wifi-device.@radio_2G.tx_power_overrule_reg", "1" );
+
+                connectGatewayWithCommand("set", strCmdTxPower + strCmdOverrideRegulartory,
+                        new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        Log.d("LIUYH", "Result of set");
+                        Log.d("LIUYH", result);
+                    }
+                });
+
+                connectGatewayWithCommand("apply", null, new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        Log.d("LIUYH", "Result of apply");
+                        Log.d("LIUYH", result);
+                    }
+                });
+            }
+        });
+        /*
         Button btLogin = (Button) findViewById(R.id.btLogin);
         btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,10 +167,15 @@ public class MainActivity extends AppCompatActivity {
                 authDialog();
             }
         });
+        */
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    public String constructSetCommandString(String strParam, String strValue) {
+        return "\"" + strParam + "\"" + ":" + "\"" + strValue + "\",\n";
     }
 
 
@@ -269,21 +300,67 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    public String getStringFromGateway(final String path, final VolleyCallback callback) {
+    /*
+    Get format:
+      {
+        "command":"get",
+        "data":[
+            "uci.wireless.wifidevice.@radio_2G.channel",
+            "uci.wireless.wifidevice.@radio_2G.standard",
+            "rpc.wireless.ssid."
+          ]
+      }
+
+      Set format
+      {
+        "command":"set",
+        "data":{
+          "uci.wireless.wifi-device.@radio_2G.channel":"1",
+            "uci.wireless.wifi-device.@radio_2G.standard":"bg"
+         }
+      }
+
+      Apply format:
+      {
+        "command":"apply",
+        "data":true    => NO ", be careful
+      }
+
+     Path is created outside of this function
+     if more than 1 command is used, the quotation mark should be added before calling;
+     */
+
+
+    public String connectGatewayWithCommand(String strCommand, final String strPath, final VolleyCallback callback) {
 
         String retStr;
 
         final long startTime = System.nanoTime();
 
         RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String body;
+        if (strCommand.equals("get") || strCommand.equals("set")) {
+             body = new String("{\n" +
+                    "  \"command\":\"" + strCommand + "\",\n" +
+                    "  \"data\":[\n" +
+                    strPath + "\n" +
+                    // "    \"" + strPath + "\",\n" +
+                    "  ]\n" +
+                    "}\n");
+        }
+        else if (strCommand.equals("apply")) {
 
+             body = new String("{\n" +
+                    "  \"command\":\"apply\",\n" +
+                    "  \"data\":true\n" +
+                    "}\n");
+        }
+        else {
+            return null;
+        }
 
-        String body = new String("{\n" +
-                "  \"command\":\"get\",\n" +
-                "  \"data\":[\n" +
-                "    \"" + path + "\",\n" +
-                "  ]\n" +
-                "}\n");
+        //Log.d("liuyh", "new body");
+        //Log.d("liuyh", body);
 
         final String requestBody = body;
 
@@ -323,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     if (requestBody != null) {
                         String body = new String(requestBody.getBytes());
-                        Log.d("LIUYH", "get body by getBody ==> " + body);
+                        // Log.d("LIUYH", "get body by getBody ==> " + body);
                     }
                     return requestBody == null ? null : requestBody.getBytes("utf-8");
                 } catch (Exception uee) {
@@ -373,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
             String rpcHostPath = String.format("rpc.hosts.host.%d.", i);
             if (result.contains(rpcHostPath) != true)
                 continue;
-            Log.d("HOST", "Find host " + rpcHostPath + "in the result string");
+            // Log.d("HOST", "Find host " + rpcHostPath + "in the result string");
             JSONObject jsonObj = getJsonFromResponse(result, rpcHostPath);
             if (jsonObj != null) {
                 String strState = null;
@@ -508,13 +585,13 @@ public class MainActivity extends AppCompatActivity {
                         //Very important for multiple commands in one rpc
                         final String connector = "\"" + ",\n" + "\"";
                         //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                        String cmd = uciEnv;
+                        String cmd = "\"" + uciEnv + "\",";
                         // Set password to x-tch-header
                         strTokenInHeader = editText.getText().toString();
                         //final String cmd = uciProdName;
                         //connectGatewayWithCommand(cmd);
 
-                        getStringFromGateway(cmd, new VolleyCallback() {
+                        connectGatewayWithCommand("get", cmd, new VolleyCallback() {
                             @Override
                             public void onSuccess(String result) {
                                 isConnected = true;
