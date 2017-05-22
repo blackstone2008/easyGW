@@ -1,5 +1,8 @@
 package cn.liuyinghua.easygateway.easygw;
 
+import android.annotation.SuppressLint;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
@@ -43,33 +48,45 @@ import java.util.Map;
 import android.widget.Toast;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener
+{
 
-    ArrayList<String> respStringList = new ArrayList<String>();
-    Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
-    Map<String, String> strHostName = new HashMap<String, String>();
-    List<String> arHostName = new ArrayList<String>();
+    static ArrayList<String> respStringList = new ArrayList<String>();
+    static Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
+    static Map<String, String> strHostName = new HashMap<String, String>();
+    static List<String> arHostName = new ArrayList<String>();
+
     // default token in header, it is used as key for authentication a session
     static String strTokenInHeader = "";
     // is gateway can be connected or not, use the Token defined above
-    boolean isConnected = false;
+    static boolean isConnected = false;
     static final String URL = "http://192.168.1.1/api";
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+
+    private StatusTab statusTab;
+    private SettingTab settingTab;
+    private ToolboxTab toolboxTab;
+
+    private LinearLayout mTabStatus;
+    private LinearLayout mTabSetting;
+    private LinearLayout mTabToolbox;
+
+    private FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        initViews();
+        fragmentManager = getFragmentManager();
+        setTabSelection(0);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (isConnected == false)
             toolbar.setBackgroundColor(Color.GRAY);
         toolbar.setTitle("Gateway not connected");
         setSupportActionBar(toolbar);
-
+/*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,103 +95,138 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
-        Button btRefreshData = (Button) findViewById(R.id.btRefresh);
-        btRefreshData.setOnClickListener(new Button.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //final String uciProdName = "uci.env.var.prod_friendly_name";
-                final String uciEnv = "uci.env.var.";
-                final String uciSSID = "uci.wireless.wifi-iface.@wl0.ssid";
-                final String rpcUpTime = "rpc.system.uptime";
-                final String rpcHosts = "rpc.hosts.";
-                final String rpcWan = "rpc.network.interface.@wan.";
-                //Very important for multiple commands in one rpc
-                final String connector = "\"" + ",\n" + "\"";
-                //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                String cmd = "\"" + uciSSID + connector + rpcUpTime + connector
-                        + uciEnv + connector + rpcHosts + connector + rpcWan + "\",";
-
-                connectGatewayWithCommand("get", cmd, new VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        String strProdName = getRetValueFromResponse(result, uciEnv, "prod_friendly_name");
-                        String strHwVersion = getRetValueFromResponse(result, uciEnv, "hardware_version");
-                        String strSSID = getRetValueFromResponse(result, uciSSID);
-                        String strUpTime = getRetValueFromResponse(result, rpcUpTime);
-                        String strWANIP = getRetValueFromResponse(result, rpcWan, "ipaddr");
-                        // Log.d("LIUYH", result);
-                        // Log.d("LIUYH", "wan ip is " + strWANIP);
-
-                        int uptime = Integer.parseInt(strUpTime);
-                        TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
-                        tvProdName.setText("Product Name: " + strProdName);
-                        TextView tvHWVersion = (TextView) findViewById(R.id.tvHWVersion);
-                        tvHWVersion.setText("Hardware Version: " + strHwVersion);
-                        TextView tvSSID = (TextView) findViewById(R.id.tvSSID);
-                        tvSSID.setText("SSID: " + strSSID);
-                        TextView tvUpTime = (TextView) findViewById(R.id.tvUpTime);
-                        tvUpTime.setText("UpTime:" + (uptime / 3600) + "hours " + (uptime % 3600) / 60 + "minutes " + uptime % 60 + "seconds");
-                        TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);
-                        tvWanIP.setText("WAN IP: " + strWANIP);
-                        getHostFromResponse(result);
-                    }
-                });
-            }
-        });
-
-        Button btHost = (Button) findViewById(R.id.btHostInfo);
-        btHost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //showClickMessage("test");
-                showListDialog();
-            }
-        });
-
-        Button btWiFiPower = (Button) findViewById(R.id.btWiFiPower);
-        btWiFiPower.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String strCmdTxPower = constructSetCommandString(
-                        "uci.wireless.wifi-device.@radio_2G.tx_power_adjust", "+2");
-                String strCmdOverrideRegulartory = constructSetCommandString(
-                        "uci.wireless.wifi-device.@radio_2G.tx_power_overrule_reg", "1" );
-
-                connectGatewayWithCommand("set", strCmdTxPower + strCmdOverrideRegulartory,
-                        new VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.d("LIUYH", "Result of set");
-                        Log.d("LIUYH", result);
-                    }
-                });
-
-                connectGatewayWithCommand("apply", null, new VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        Log.d("LIUYH", "Result of apply");
-                        Log.d("LIUYH", result);
-                    }
-                });
-            }
-        });
-        /*
-        Button btLogin = (Button) findViewById(R.id.btLogin);
-        btLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                authDialog();
-            }
-        });
-        */
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+*/
     }
 
-    public String constructSetCommandString(String strParam, String strValue) {
+    private void initViews()
+    {
+        mTabStatus = (LinearLayout) findViewById(R.id.id_tab_bottom_status);
+        mTabSetting = (LinearLayout) findViewById(R.id.id_tab_bottom_setting);
+        mTabToolbox = (LinearLayout) findViewById(R.id.id_tab_bottom_toolbox);
+
+        mTabStatus.setOnClickListener(this);
+        mTabSetting.setOnClickListener(this);
+        mTabToolbox.setOnClickListener(this);
+    }
+
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.id_tab_bottom_status:
+                setTabSelection(0);
+                break;
+            case R.id.id_tab_bottom_setting:
+                setTabSelection(1);
+                break;
+            case R.id.id_tab_bottom_toolbox:
+                setTabSelection(2);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void setTabSelection(int index)
+    {
+        // 重置按钮
+        resetBtn();
+        // 开启一个Fragment事务
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // 先隐藏掉所有的Fragment，以防止有多个Fragment显示在界面上的情况
+        hideFragments(transaction);
+        switch (index)
+        {
+            case 0:
+                // 当点击了消息tab时，改变控件的图片和文字颜色
+                ((ImageButton) mTabStatus.findViewById(R.id.btn_tab_bottom_status))
+                        .setImageResource(R.mipmap.tab_status_pressed);
+                if (statusTab == null)
+                {
+                    // 如果MessageFragment为空，则创建一个并添加到界面上
+                    statusTab = new StatusTab();
+                    transaction.add(R.id.id_content, statusTab);
+                } else
+                {
+                    // 如果MessageFragment不为空，则直接将它显示出来
+                    transaction.show(statusTab);
+                }
+                break;
+            case 1:
+                // 当点击了消息tab时，改变控件的图片和文字颜色
+                ((ImageButton) mTabSetting.findViewById(R.id.btn_tab_bottom_setting))
+                        .setImageResource(R.mipmap.tab_settings_pressed);
+                if (settingTab == null)
+                {
+                    // 如果MessageFragment为空，则创建一个并添加到界面上
+                    settingTab = new SettingTab();
+                    transaction.add(R.id.id_content, settingTab);
+                } else
+                {
+                    // 如果MessageFragment不为空，则直接将它显示出来
+                    transaction.show(settingTab);
+                }
+                break;
+            case 2:
+                // 当点击了动态tab时，改变控件的图片和文字颜色
+                ((ImageButton) mTabToolbox.findViewById(R.id.btn_tab_bottom_toolbox))
+                        .setImageResource(R.mipmap.tab_toobox_pressed);
+                if (toolboxTab == null)
+                {
+                    // 如果NewsFragment为空，则创建一个并添加到界面上
+                    toolboxTab = new ToolboxTab();
+                    transaction.add(R.id.id_content, toolboxTab);
+                } else
+                {
+                    // 如果NewsFragment不为空，则直接将它显示出来
+                    transaction.show(toolboxTab);
+                }
+                break;
+        }
+        transaction.commit();
+    }
+
+    /**
+     * 清除掉所有的选中状态。
+     */
+    private void resetBtn()
+    {
+        ((ImageButton) mTabStatus.findViewById(R.id.btn_tab_bottom_status))
+                .setImageResource(R.mipmap.tab_status_normal);
+        ((ImageButton) mTabSetting.findViewById(R.id.btn_tab_bottom_setting))
+                .setImageResource(R.mipmap.tab_settings_normal);
+        ((ImageButton) mTabToolbox.findViewById(R.id.btn_tab_bottom_toolbox))
+                .setImageResource(R.mipmap.tab_toobox_normal);
+
+    }
+
+    /**
+     * 将所有的Fragment都置为隐藏状态。
+     *
+     * @param transaction
+     *            用于对Fragment执行操作的事务
+     */
+    @SuppressLint("NewApi")
+    private void hideFragments(FragmentTransaction transaction)
+    {
+        if (statusTab != null)
+        {
+            transaction.hide(statusTab);
+        }
+        if (settingTab != null)
+        {
+            transaction.hide(settingTab);
+        }
+        if (toolboxTab != null)
+        {
+            transaction.hide(toolboxTab);
+        }
+    }
+
+
+
+    public static String constructSetCommandString(String strParam, String strValue) {
         return "\"" + strParam + "\"" + ":" + "\"" + strValue + "\",\n";
     }
 
@@ -240,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
         },
     如果paramPath是一个父节点，则其返回值是父节点为json的名称；与上边只返回一个参数不同，这里返回的所有的参数
      */
-    public String getRetValueFromResponse(String jsonStr, String paramPath) {
+    public static String getRetValueFromResponse(String jsonStr, String paramPath) {
 
         //参数全路径，指明的是叶子节点
 
@@ -264,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
     //jsonStr is the response Json string
     //paramPath is the parent node ended with "."
     //return value is the JSON object for the parent object
-    public String getRetValueFromResponse(String jsonStr, String paramPath, String paraName) {
+    public static String getRetValueFromResponse(String jsonStr, String paramPath, String paraName) {
 
         //参数全路径，指明的是叶子节点
         if (paramPath.charAt(paramPath.length() - 1) != '.') {
@@ -288,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
-    public JSONObject getJsonFromResponse(String jsonStr, String paramPath) {
+    public static JSONObject getJsonFromResponse(String jsonStr, String paramPath) {
         try {
             JSONObject json = new JSONObject(jsonStr);
             JSONObject responseJson = json.getJSONObject("response");
@@ -359,8 +411,8 @@ public class MainActivity extends AppCompatActivity {
             return null;
         }
 
-        //Log.d("liuyh", "new body");
-        //Log.d("liuyh", body);
+        Log.d("liuyh", "new body");
+        Log.d("liuyh", body);
 
         final String requestBody = body;
 
@@ -527,41 +579,6 @@ public class MainActivity extends AppCompatActivity {
         hostDialog.show();
     }
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        AppIndex.AppIndexApi.start(client, getIndexApiAction());
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client, getIndexApiAction());
-        client.disconnect();
-    }
 
     public interface VolleyCallback {
         void onSuccess(String result);
@@ -601,11 +618,14 @@ public class MainActivity extends AppCompatActivity {
                                 TextView tvProd = (TextView) findViewById(R.id.tvProductName);
                                 TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);
                                 tvWanIP.setText(strWanIP);
+                                // toolbar support
 
                                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                                 toolbar.setTitle(tvProd + " connected");
                                 toolbar.setLogo(R.drawable.common_full_open_on_phone);
                                 toolbar.setBackgroundColor(Color.GREEN);
+                                Log.d("LIUYH", "body");
+                                Log.d("LIUYH", result);
 
                             }
                         });

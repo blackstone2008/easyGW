@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ly_main_status"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#fcfcfc"
+    android:orientation="vertical" >
+
+    <include layout="@layout/title_bar"/>
+
+
+    <TextView
+        android:id="@+id/tvProductName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Summary"
+        android:textSize="30dp" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Refresh Data"
+            android:onClick="OnRefreshData"
+            android:text="Refresh"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btHostInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="HostInfo"
+            android:text="Hosts"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/btWiFiPower"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Login"
+            android:text="WiFi Power"
+            android:visibility="visible" />
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvHWVersion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Model:" />
+
+    <TextView
+        android:id="@+id/tvGatewayModel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GatewayModel" />
+
+    <TextView
+        android:id="@+id/InternetStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="InternetStatus" />
+
+    <TextView
+        android:id="@+id/tvSSID"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WiFiName" />
+
+    <TextView
+        android:id="@+id/tvWiFiStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WiFiStatus" />
+
+    <TextView
+        android:id="@+id/tvUpTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="UpTime" />
+
+    <TextView
+        android:id="@+id/tvHostInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hosts" />
+
+    <TextView
+        android:id="@+id/tvWanIP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WAN IP" />
+
+
+</LinearLayout>
