@@ -3,6 +3,7 @@ package cn.liuyinghua.easygateway.easygw;
 import android.annotation.SuppressLint;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -86,6 +87,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             toolbar.setBackgroundColor(Color.GRAY);
         toolbar.setTitle("Gateway not connected");
         setSupportActionBar(toolbar);
+
+
 
 /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);

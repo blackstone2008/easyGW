@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.json.JSONObject;
@@ -37,6 +38,17 @@ public class StatusTab extends Fragment {
     public void onStart() {
         super.onStart();
         //((MainActivity)getActivity()).connectGatewayWithCommand()
+
+        final ImageButton internetStatus;
+        internetStatus = (ImageButton) getView(). findViewById(R.id.ibInternetStatus);
+        internetStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!MainActivity.isConnected )
+                    ((MainActivity)getActivity()).authDialog();
+            }
+        });
+
 
         Button btRefreshData = (Button) getView().findViewById(R.id.btRefresh);
         btRefreshData.setOnClickListener(new Button.OnClickListener() {
