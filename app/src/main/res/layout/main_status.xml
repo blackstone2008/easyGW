@@ -6,7 +6,7 @@
     android:background="#fcfcfc"
     android:orientation="vertical" >
 
-    <include layout="@layout/title_bar"/>
+ <!--   <include layout="@layout/title_bar"/>  -->
 
 
     <TextView
@@ -15,6 +15,20 @@
         android:layout_height="wrap_content"
         android:text="Summary"
         android:textSize="30dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#0000"
+            android:clickable="true"
+            android:src="@mipmap/internet_no_connection"
+            android:id="@+id/ibInternetStatus"
+            />
+
+    </LinearLayout>
 
 
     <LinearLayout

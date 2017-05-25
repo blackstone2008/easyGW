@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             toolbar.setBackgroundColor(Color.GRAY);
         toolbar.setTitle("Gateway not connected");
         setSupportActionBar(toolbar);
+
 /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -601,8 +602,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         final String rpcWan = "rpc.network.interface.@wan.ipaddr";
                         //Very important for multiple commands in one rpc
                         final String connector = "\"" + ",\n" + "\"";
-                        //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                        String cmd = "\"" + uciEnv + "\",";
+                        //String cmd = "\"" + uciEnv + "\",";
+                        String cmd = "\"" + uciEnv +connector + rpcWan + "\",";
                         // Set password to x-tch-header
                         strTokenInHeader = editText.getText().toString();
                         //final String cmd = uciProdName;
@@ -620,10 +621,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 tvWanIP.setText(strWanIP);
                                 // toolbar support
 
+                                if (strWanIP.length() > 0) {
+                                    //Wan is up
+                                   ImageButton ibWanStatus =  (ImageButton)findViewById(R.id.ibInternetStatus);
+                                    ibWanStatus.setImageResource(R.mipmap.internet_connected);
+                                }
+                                else {
+                                    ImageButton ibWanStatus =  (ImageButton)findViewById(R.id.ibInternetStatus);
+                                    ibWanStatus.setImageResource(R.mipmap.internet_no_connection);
+                                }
+
                                 Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-                                toolbar.setTitle(tvProd + " connected");
-                                toolbar.setLogo(R.drawable.common_full_open_on_phone);
-                                toolbar.setBackgroundColor(Color.GREEN);
+                                toolbar.setTitle(strProdName + " Connected");
+                                toolbar.setBackgroundColor(Color.rgb(0,200,0));
                                 Log.d("LIUYH", "body");
                                 Log.d("LIUYH", result);
 
