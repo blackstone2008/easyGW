@@ -10,13 +10,20 @@
 
     <TextView
         android:layout_width="fill_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="center"
-        android:text="this is setting tab !"
+        android:gravity="top|center"
+        android:text="Setting"
         android:textColor="#000000"
         android:textSize="30sp"
         android:id="@+id/tvTest2"
+        />
+
+    <Button
+        android:id="@+id/btWiFiPower"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WiFi Power"
         />
 
 
