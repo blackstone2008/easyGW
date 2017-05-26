@@ -54,45 +54,7 @@ public class StatusTab extends Fragment {
         btRefreshData.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //final String uciProdName = "uci.env.var.prod_friendly_name";
-                final String uciEnv = "uci.env.var.";
-                final String uciSSID = "uci.wireless.wifi-iface.@wl0.ssid";
-                final String rpcUpTime = "rpc.system.uptime";
-                final String rpcHosts = "rpc.hosts.";
-                final String rpcWan = "rpc.network.interface.@wan.";
-                //Very important for multiple commands in one rpc
-                final String connector = "\"" + ",\n" + "\"";
-                //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-                String cmd = "\"" + uciSSID + connector + rpcUpTime + connector
-                        + uciEnv + connector + rpcHosts + connector + rpcWan + "\",";
-
-                ((MainActivity)getActivity()).connectGatewayWithCommand("get", cmd, new MainActivity.VolleyCallback() {
-                    @Override
-                    public void onSuccess(String result) {
-                        String strProdName = MainActivity.getRetValueFromResponse(result, uciEnv, "prod_friendly_name");
-                        String strHwVersion = MainActivity.getRetValueFromResponse(result, uciEnv, "hardware_version");
-                        String strSSID = MainActivity.getRetValueFromResponse(result, uciSSID);
-                        String strUpTime = MainActivity.getRetValueFromResponse(result, rpcUpTime);
-                        String strWANIP = MainActivity.getRetValueFromResponse(result, rpcWan, "ipaddr");
-                        // Log.d("LIUYH", result);
-                        // Log.d("LIUYH", "wan ip is " + strWANIP);
-
-                        int uptime = Integer.parseInt(strUpTime);
-                        TextView tvProdName = (TextView) getView().findViewById(R.id.tvGatewayModel);
-                        tvProdName.setText("Product Name: " + strProdName);
-                        TextView tvHWVersion = (TextView) getView().findViewById(R.id.tvHWVersion);
-                        tvHWVersion.setText("Hardware Version: " + strHwVersion);
-                        TextView tvSSID = (TextView) getView().findViewById(R.id.tvSSID);
-                        tvSSID.setText("SSID: " + strSSID);
-                        TextView tvUpTime = (TextView) getView().findViewById(R.id.tvUpTime);
-                        tvUpTime.setText("UpTime:" + (uptime / 3600) + "hours " + (uptime % 3600) / 60 + "minutes " + uptime % 60 + "seconds");
-                        TextView tvWanIP = (TextView) getView().findViewById(R.id.tvWanIP);
-                        tvWanIP.setText("WAN IP: " + strWANIP);
-
-                        ((MainActivity)getActivity()).getHostFromResponse(result);
-
-                    }
-                });
+                ((MainActivity)getActivity()).refreshGateway();
             }
         });
 
@@ -135,4 +97,5 @@ public class StatusTab extends Fragment {
 
 
     }
+
 }

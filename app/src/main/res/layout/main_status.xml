@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ly_main_status"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -13,12 +14,44 @@
         android:id="@+id/tvProductName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Summary"
-        android:textSize="30dp" />
+        android:gravity="center_horizontal"
+        android:text="Gateway"
+        android:textSize="25dp"
+        android:textColor="@android:color/holo_green_dark"
+        tools:gravity="center" />
+    <!--  分割线  -->
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#808080"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Active Hosts"
+            android:textColor="#00F000"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvActiveHosts"
+            />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:showDividers="end"
+        android:divider="#000000"
+        >
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -30,11 +63,18 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#808080"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:showDividers="end"
+        android:divider="#000000" >
 
         <Button
             android:id="@+id/btRefresh"
