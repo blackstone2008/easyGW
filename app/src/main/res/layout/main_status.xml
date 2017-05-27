@@ -25,18 +25,19 @@
         android:layout_height="1dp"
         android:background="#808080"
         />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView
+    <!--
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Active Hosts"
-            android:textColor="#00F000"
-            android:textSize="20dp"
-            />
+            android:orientation="verl">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Active Hosts"
+                android:textColor="#00F000"
+                android:textSize="20dp"
+                />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,6 +46,7 @@
 
 
     </LinearLayout>
+ -->
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,29 +71,7 @@
         android:background="#808080"
         />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
 
-        <Button
-            android:id="@+id/btRefresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Refresh Data"
-            android:onClick="OnRefreshData"
-            android:text="Refresh"
-            android:visibility="visible" />
-
-        <Button
-            android:id="@+id/btHostInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:contentDescription="HostInfo"
-            android:text="Hosts"
-            android:visibility="visible" />
-    </LinearLayout>
 
         <ImageView
             android:layout_width="fill_parent"
@@ -113,6 +93,30 @@
             />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        >
+
+        <Button
+            android:id="@+id/btRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Refresh Data"
+            android:onClick="OnRefreshData"
+            android:text="Refresh"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/btHostInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:contentDescription="HostInfo"
+            android:text="Hosts"
+            android:visibility="invisible" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -27,9 +27,6 @@ import java.util.Map;
  */
 
 public class StatusTab extends Fragment {
-
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,51 +55,9 @@ public class StatusTab extends Fragment {
         btRefreshData.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).refreshGateway();
+                //((MainActivity)getActivity()).refreshGateway();
 
-                /////////////////////////////////
-                ListView lvHostList;
-                lvHostList = (ListView) getView().findViewById(R.id.lvHostsList);
-                String [] hostnames = {"HostName",  "IP", /* "MAC", */ "ConnectedTime"};
-                int [] ids = {R.id.id_host_name, R.id.id_host_ip_addr, /* R.id.id_host_mac, */ R.id.id_host_connection_time};
-        /*
-        static Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
-        static List<String> arHostName = new ArrayList<String>();
-        */
-                ArrayList<HashMap<String,String>> list=null;
-                list=new ArrayList<HashMap<String,String>>();
-                HashMap<String,String> map=null;
-                String connTime;
-                int uptime;
-                for(int i = 0; i < ((MainActivity)getActivity()).arHostName.size(); i++){
-                    map=new HashMap<String,String>();       //为避免产生空指针异常，有几列就创建几个map对象
-                    map.put("HostName", ((MainActivity)getActivity()).arHostName.get(i));
-                    JSONObject jsonHost = ((MainActivity)getActivity()).jsonMapHostName.get(((MainActivity)getActivity()).arHostName.get(i));
-                    map.put("IP",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "IPAddress"));
-                    //map.put("MAC",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "MACAddress"));
-                    connTime =  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "ConnectedTime");
-                    uptime = Integer.parseInt(connTime);
-                    connTime = (uptime / 3600) + "H" + (uptime % 3600) / 60 + "M" + uptime % 60 + "S";
-                    map.put("ConnectedTime", connTime);
 
-                    Log.d("LIUYH", i + ".  " + map.get("HostName") + "     :       " + map.get("IP") + " : " +
-                         /*   map.get("MAC") + */"   :   " + map.get("ConnectedTime"));
-                    list.add(map);
-                }
-
-                SimpleAdapter adapter=new SimpleAdapter(getView().getContext(),
-                        list, R.layout.host_list,
-                        hostnames, ids);
-                lvHostList.setAdapter(adapter);
-
-                lvHostList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        Toast.makeText(((MainActivity)getActivity()), ((MainActivity)getActivity()).arHostName.get(i),
-                                Toast.LENGTH_LONG).show();
-                    }
-                });
-                //////////////////////////////////////
             }
         });
 
@@ -120,5 +75,51 @@ public class StatusTab extends Fragment {
 
 
     }
+
+    public void updateHostsList() {
+        ListView lvHostList;
+        lvHostList = (ListView) getView().findViewById(R.id.lvHostsList);
+        String [] hostnames = {"HostName",  "IP", /* "MAC", */ "ConnectedTime"};
+        int [] ids = {R.id.id_host_name, R.id.id_host_ip_addr, /* R.id.id_host_mac, */ R.id.id_host_connection_time};
+        /*
+        static Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
+        static List<String> arHostName = new ArrayList<String>();
+        */
+        ArrayList<HashMap<String,String>> list=null;
+        list=new ArrayList<HashMap<String,String>>();
+        HashMap<String,String> map=null;
+        String connTime;
+        int uptime;
+        for(int i = 0; i < ((MainActivity)getActivity()).arHostName.size(); i++){
+            map=new HashMap<String,String>();
+            map.put("HostName", ((MainActivity)getActivity()).arHostName.get(i));
+            JSONObject jsonHost = ((MainActivity)getActivity()).jsonMapHostName.get(((MainActivity)getActivity()).arHostName.get(i));
+            map.put("IP",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "IPAddress"));
+            //map.put("MAC",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "MACAddress"));
+            connTime =  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "ConnectedTime");
+            uptime = Integer.parseInt(connTime);
+            connTime = (uptime / 3600) + "H" + (uptime % 3600) / 60 + "M" + uptime % 60 + "S";
+            map.put("ConnectedTime", connTime);
+
+            Log.d("LIUYH", i + ".  " + map.get("HostName") + "     :       " + map.get("IP") + " : " +
+                         /*   map.get("MAC") + */"   :   " + map.get("ConnectedTime"));
+            list.add(map);
+        }
+
+        SimpleAdapter adapter=new SimpleAdapter(getView().getContext(),
+                list, R.layout.host_list,
+                hostnames, ids);
+        lvHostList.setAdapter(adapter);
+
+        lvHostList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(((MainActivity)getActivity()), ((MainActivity)getActivity()).arHostName.get(i),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
+
 
 }

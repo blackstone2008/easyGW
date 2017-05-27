@@ -1,6 +1,7 @@
 package cn.liuyinghua.easygateway.easygw;
 
 import android.annotation.SuppressLint;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.res.Resources;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fragmentManager = getFragmentManager();
         setTabSelection(0);
 
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (isConnected == false)
             toolbar.setBackgroundColor(Color.GRAY);
@@ -112,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mTabStatus.setOnClickListener(this);
         mTabSetting.setOnClickListener(this);
         mTabToolbox.setOnClickListener(this);
+
     }
 
     public void onClick(View v)
@@ -505,15 +508,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //host rpc string and try to find it in the result string (which is a big json string)
         for (int i = 0; i < 255; i++) {
             String rpcHostPath = String.format("rpc.hosts.host.%d.", i);
+            // If the rpc path is in the repsonse message, then handle it
             if (result.contains(rpcHostPath) != true)
                 continue;
+
             // Log.d("HOST", "Find host " + rpcHostPath + "in the result string");
             JSONObject jsonObj = getJsonFromResponse(result, rpcHostPath);
             if (jsonObj != null) {
+                /*
                 String strState = null;
                 strState = getJsonParamValue(jsonObj, "State");
                 if (strState.equals("0"))
                     continue;
+                */
                 //State = 1, this is an active host
                 String strHostFriendlyName = getJsonParamValue(jsonObj, "FriendlyName");
                 String strIP = getJsonParamValue(jsonObj, "IPAddress");
@@ -600,6 +607,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tvWanIP.setText("WAN IP: " + strWANIP);
 
                 getHostFromResponse(result);
+
+                Log.d("LIUYH", "Updating host list in authentDiag");
+                statusTab.updateHostsList();
 
             }
         });
@@ -688,6 +698,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                //Log.d("LIUYH", "body");
                                 //Log.d("LIUYH", result);
+                                refreshGateway();
+
+
+                                //Fragment fgStatus = (Fragment) fragmentManager.findFragmentById(R.id.id_content);
+                               // fgStatus.
+                                //fgStatus.updateHostsList();
+
 
                             }
                         });
@@ -695,6 +712,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }).show();
 
-        refreshGateway();
+
     }
 }
