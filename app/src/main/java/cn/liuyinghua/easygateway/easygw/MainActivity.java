@@ -574,13 +574,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //final String uciProdName = "uci.env.var.prod_friendly_name";
         final String uciEnv = "uci.env.var.";
         final String uciSSID = "uci.wireless.wifi-iface.@wl0.ssid";
+        final String uciSSID5G = "uci.wireless.wifi-iface.@wl1.ssid";
         final String rpcUpTime = "rpc.system.uptime";
         final String rpcHosts = "rpc.hosts.";
         final String rpcWan = "rpc.network.interface.@wan.";
         //Very important for multiple commands in one rpc
         final String connector = "\"" + ",\n" + "\"";
         //连接gateway之前只考虑了一个命令，所以需要给get参数添加双引号
-        String cmd = "\"" + uciSSID + connector + rpcUpTime + connector
+        String cmd = "\"" + uciSSID + connector + uciSSID5G + connector + rpcUpTime + connector
                 + uciEnv + connector + rpcHosts + connector + rpcWan + "\",";
 
         connectGatewayWithCommand("get", cmd, new MainActivity.VolleyCallback() {
@@ -589,6 +590,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String strProdName = MainActivity.getRetValueFromResponse(result, uciEnv, "prod_friendly_name");
                 String strHwVersion = MainActivity.getRetValueFromResponse(result, uciEnv, "hardware_version");
                 String strSSID = MainActivity.getRetValueFromResponse(result, uciSSID);
+                String strSSID5G = MainActivity.getRetValueFromResponse(result, uciSSID5G);
                 String strUpTime = MainActivity.getRetValueFromResponse(result, rpcUpTime);
                 String strWANIP = MainActivity.getRetValueFromResponse(result, rpcWan, "ipaddr");
                 // Log.d("LIUYH", result);
@@ -597,10 +599,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int uptime = Integer.parseInt(strUpTime);
                 TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
                 tvProdName.setText("Product Name: " + strProdName);
-                TextView tvHWVersion = (TextView) findViewById(R.id.tvHWVersion);
-                tvHWVersion.setText("Hardware Version: " + strHwVersion);
+
                 TextView tvSSID = (TextView) findViewById(R.id.tvSSID);
-                tvSSID.setText("SSID: " + strSSID);
+                tvSSID.setText("SSID(2.4G): " + strSSID);
+                TextView tvSSID5G = (TextView) findViewById(R.id.tvSSID5G);
+                tvSSID5G.setText("SSID(5G): " + strSSID5G);
                 TextView tvUpTime = (TextView) findViewById(R.id.tvUpTime);
                 tvUpTime.setText("UpTime:" + (uptime / 3600) + "hours " + (uptime % 3600) / 60 + "minutes " + uptime % 60 + "seconds");
                 TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);

@@ -8,6 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="on/off line indicator"
+        android:id="@+id/id_state_indicator"
         android:src="@drawable/online"/>
 
     <LinearLayout
