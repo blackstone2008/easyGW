@@ -70,17 +70,13 @@ public class StatusTab extends Fragment {
             }
         });
 
-
-
-
-
     }
 
     public void updateHostsList() {
         ListView lvHostList;
         lvHostList = (ListView) getView().findViewById(R.id.lvHostsList);
-        String [] hostnames = {"HostName",  "IP", /* "MAC", */ "ConnectedTime"};
-        int [] ids = {R.id.id_host_name, R.id.id_host_ip_addr, /* R.id.id_host_mac, */ R.id.id_host_connection_time};
+        String [] hostnames = {"HostName",  "IP",  "MAC",  "ConnectedTime"};
+        int [] ids = {R.id.id_host_name, R.id.id_host_ip_addr,  R.id.id_host_mac,  R.id.id_host_connection_time};
         /*
         static Map<String, JSONObject> jsonMapHostName = new HashMap<String, JSONObject>();
         static List<String> arHostName = new ArrayList<String>();
@@ -94,15 +90,15 @@ public class StatusTab extends Fragment {
             map=new HashMap<String,String>();
             map.put("HostName", ((MainActivity)getActivity()).arHostName.get(i));
             JSONObject jsonHost = ((MainActivity)getActivity()).jsonMapHostName.get(((MainActivity)getActivity()).arHostName.get(i));
-            map.put("IP",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "IPv4"));
-            //map.put("MAC",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "MACAddress"));
+            map.put("IP",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "IPAddress"));
+            map.put("MAC",  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "MACAddress"));
             connTime =  ((MainActivity)getActivity()).getJsonParamValue(jsonHost, "ConnectedTime");
             uptime = Integer.parseInt(connTime);
             connTime = (uptime / 3600) + "H-" + (uptime % 3600) / 60 + "M-" + uptime % 60 + "S";
             map.put("ConnectedTime", connTime);
 
             Log.d("LIUYH", i + ".  " + map.get("HostName") + "     :       " + map.get("IP") + " : " +
-                         /*   map.get("MAC") + */"   :   " + map.get("ConnectedTime"));
+                           map.get("MAC") + "   :   " + map.get("ConnectedTime"));
             list.add(map);
         }
 

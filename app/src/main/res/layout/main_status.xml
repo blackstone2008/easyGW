@@ -52,6 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:showDividers="end"
+        android:orientation="horizontal"
         android:divider="#000000"
         >
         <ImageButton
@@ -62,6 +63,11 @@
             android:src="@mipmap/internet_no_connection"
             android:id="@+id/ibInternetStatus"
             />
+        <TextView
+            android:id="@+id/tvWanIP"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WAN IP" />
 
     </LinearLayout>
 
@@ -164,11 +170,7 @@
             android:layout_height="wrap_content"
             android:text="Hosts" />
 
-        <TextView
-            android:id="@+id/tvWanIP"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="WAN IP" />
+
 
     </LinearLayout>
 
