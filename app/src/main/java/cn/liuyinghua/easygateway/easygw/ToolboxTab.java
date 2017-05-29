@@ -53,7 +53,23 @@ public class ToolboxTab extends Fragment {
         btSpeedTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                doSpeedTest();
+                final long startTime = System.nanoTime();
+                doSpeedTest(new VolleyCallback() {
+                    @Override
+                    public void onSuccess(String result) {
+                        long endTime = System.nanoTime();
+                        long duration = endTime - startTime;
+                        Log.d("speedTest", "start=" + startTime + "  endTime= " + endTime);
+                        Log.d("speedTest", "duration in sec: " + (float)duration/1000000000f);
+                        double sec = (float)duration/1000000000f;
+                        double speed = 8.0/sec; // 8 is bit, the file downloaded is 1M, so in total 8Mb;
+                        DecimalFormat df = new DecimalFormat("#.0");
+
+                        Log.d("speedTest", "duration of testing: " + speed);
+                        TextView tvResult = (TextView)getView().findViewById(R.id.id_tv_speed_result);
+                        tvResult.setText("Estimated Bandwidth: " + df.format(speed));
+                    }
+                });
             }
         });
 
@@ -85,37 +101,10 @@ public class ToolboxTab extends Fragment {
     }
 
 
-    public void doSpeedTest() {
-
-        String retStr;
-
-        final long startTime = System.nanoTime();
-
+    public void doSpeedTest(final VolleyCallback callback) {
+        //final long startTime = 0;
         RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-    //    String body;
         String url = "http://218.26.109.107/SpeedTest/index.php?file=1m&r=0.0";
-
-     //   final String requestBody = body;
-
-     //   SsX509TrustManager.allowAllSSL();
-
-        Response.Listener<String> responseListener = new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                long endTime = System.nanoTime();
-                long duration = endTime - startTime;
-                Log.d("speedTest", "start=" + startTime + "  endTime= " + endTime);
-                Log.d("speedTest", "duration in sec: " + (float)duration/1000000000f);
-                double sec = (float)duration/1000000000f;
-                double speed = 8.0/sec; // 8 is bit, the file downloaded is 1M, so in total 8Mb;
-                DecimalFormat df = new DecimalFormat("#.0");
-
-                Log.d("speedTest", "duration of testing: " + speed);
-                TextView tvResult = (TextView)getView().findViewById(R.id.id_tv_speed_result);
-                tvResult.setText("Estimated Bandwidth: " + df.format(speed));
-            }
-        };
-
         Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -123,9 +112,23 @@ public class ToolboxTab extends Fragment {
             }
         };
 
+        Response.Listener<String> responseListener = new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                callback.onSuccess(response);
+            }
+        };
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, responseListener, errorListener) {        };
 
+        //here is the start of time;
         requestQueue.add(stringRequest);
 
     }
+
+    public interface VolleyCallback {
+        void onSuccess(String result);
+    }
+
+
 }
