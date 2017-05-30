@@ -77,7 +77,7 @@ public class ToolboxTab extends Fragment {
         btLog.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //((MainActivity)getActivity()).refreshGateway();
+                //((MainActivity)getActivity()).refreshGate way();
                 final String strCmd = "InternetGatewayDevice.DeviceInfo.DeviceLog";
                 String cmd = "\"" + strCmd + "\"";
                 ((MainActivity)getActivity()).connectGatewayWithCommand("get", cmd, new MainActivity.VolleyCallback() {

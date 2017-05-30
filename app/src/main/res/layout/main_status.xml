@@ -17,9 +17,9 @@
         android:gravity="center_horizontal"
         android:text="Gateway"
         android:textSize="25dp"
-        android:textColor="@android:color/holo_green_dark"
+        android:textColor="#808080"
         tools:gravity="center" />
-    <!--  分割线  -->
+
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="1dp"
@@ -45,12 +45,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/activity_vertical_margin">
             <TextView
             android:id="@+id/tvWanIP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="WAN IP" />
+            android:text="WAN IP:" />
 
             <TextView
                 android:id="@+id/tvSSID"
@@ -64,9 +65,10 @@
                 android:text="SSID(5G):" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvUpTime"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                />
+                android:text="UpTime:" />
 
         </LinearLayout>
 
@@ -87,7 +89,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Active Hosts:"
+            android:text="Hosts List:"
             android:textSize="20dp"
             android:textStyle="bold"/>
 
@@ -98,6 +100,11 @@
             />
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#808080"
+        />
 
     <LinearLayout
         android:orientation="vertical"
@@ -118,68 +125,10 @@
             />
     </LinearLayout>
 
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <Button
-            android:id="@+id/btRefresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="Refresh Data"
-            android:onClick="OnRefreshData"
-            android:text="Refresh"
-            android:visibility="invisible" />
-        <Button
-            android:id="@+id/btHostInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:contentDescription="HostInfo"
-            android:text="Hosts"
-            android:visibility="invisible" />
-
-        <TextView
-            android:id="@+id/tvHWVersion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Model:" />
-
-        <TextView
-            android:id="@+id/tvGatewayModel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="GatewayModel" />
-
-        <TextView
-            android:id="@+id/InternetStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="InternetStatus" />
-
-
-
-        <TextView
-            android:id="@+id/tvWiFiStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="WiFiStatus" />
-
-        <TextView
-            android:id="@+id/tvUpTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="UpTime" />
-
-        <TextView
-            android:id="@+id/tvHostInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Hosts" />
-
-
-
-    </LinearLayout>
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#808080"
+        />
 
 </LinearLayout>

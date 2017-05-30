@@ -533,11 +533,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
             }
         }
+        /*
         TextView tvHosts = (TextView) findViewById(R.id.tvHostInfo);
         if (strHostInfo != null)
             tvHosts.setText(strHostInfo);
         else
             tvHosts.setText("NO host info collected");
+            */
         return strHostInfo;
     }
 
@@ -569,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         listDialog.show();
     }
-
+/*
     public void refreshGateway() {
         //final String uciProdName = "uci.env.var.prod_friendly_name";
         final String uciEnv = "uci.env.var.";
@@ -593,12 +595,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String strSSID5G = MainActivity.getRetValueFromResponse(result, uciSSID5G);
                 String strUpTime = MainActivity.getRetValueFromResponse(result, rpcUpTime);
                 String strWANIP = MainActivity.getRetValueFromResponse(result, rpcWan, "ipaddr");
-                // Log.d("LIUYH", result);
-                // Log.d("LIUYH", "wan ip is " + strWANIP);
+
 
                 int uptime = Integer.parseInt(strUpTime);
-                TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
-                tvProdName.setText("Product Name: " + strProdName);
+
+                //TextView tvProdName = (TextView) findViewById(R.id.tvGatewayModel);
+                //tvProdName.setText("Product Name: " + strProdName);
 
                 TextView tvSSID = (TextView) findViewById(R.id.tvSSID);
                 tvSSID.setText("SSID(2.4G): " + strSSID);
@@ -617,11 +619,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
+*/
     public void showHostDialog(JSONObject jsonHost) {
         AlertDialog.Builder hostDialog = new AlertDialog.Builder(MainActivity.this);
         hostDialog.setTitle(getJsonParamValue(jsonHost, "FriendlyName"));
         String strLayer2Type = getJsonParamValue(jsonHost, "FriendlyName");
+        String strMAC = "MAC: " + getJsonParamValue(jsonHost, "FriendlyName");
+        String strPort = "Port:" + getJsonParamValue(jsonHost, "Port");
         String strConnectionType = strLayer2Type.contains("wl") ? "Wi-Fi" : "Ethernet";
         strConnectionType = "Connection Mode: " + (strLayer2Type.equals("wl0") ? "2.4G Wi-Fi" : "5G Wi-Fi");
         String strIP = "IP Address: " + getJsonParamValue(jsonHost, "IPAddress");
@@ -629,7 +633,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int connTime = Integer.parseInt(getJsonParamValue(jsonHost, "ConnectedTime"));
         String strConnTime = "Connection Time: " +  connTime/3600 + " Hours " + connTime%3600/60
                 + " Minutes " + connTime%60 + "Seconds ";
-        final String[] items = {strConnectionType, strIP, strIP};
+
+        final String[] items = {strConnectionType, strIP, strMAC, strPort, strConnTime};
 
         hostDialog.setItems(items, new DialogInterface.OnClickListener() {
             @Override
@@ -661,54 +666,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onClick(DialogInterface dialog, int which) {
                         final String uciEnv = "uci.env.var.prod_friendly_name";
                         final String rpcWan = "rpc.network.interface.@wan.ipaddr";
+                        final String uciSSID = "uci.wireless.wifi-iface.@wl0.ssid";
+                        final String uciSSID5G = "uci.wireless.wifi-iface.@wl1.ssid";
+                        final String rpcUpTime = "rpc.system.uptime";
+                        final String rpcHosts = "rpc.hosts.";
+
                         //Very important for multiple commands in one rpc
                         final String connector = "\"" + ",\n" + "\"";
                         //String cmd = "\"" + uciEnv + "\",";
-                        String cmd = "\"" + uciEnv +connector + rpcWan + "\",";
+                        String cmd = "\"" + uciEnv +connector + rpcWan +  connector + uciSSID +
+                                connector + uciSSID5G + connector + rpcUpTime + connector + rpcHosts + "\",";
                         // Set password to x-tch-header
                         strTokenInHeader = editText.getText().toString();
-                        //final String cmd = uciProdName;
-                        //connectGatewayWithCommand(cmd);
+
 
                         connectGatewayWithCommand("get", cmd, new VolleyCallback() {
                             @Override
                             public void onSuccess(String result) {
                                 isConnected = true;
-                                String strProdName = getRetValueFromResponse(result, uciEnv);
-                                String strWanIP = getRetValueFromResponse(result, rpcWan);
-
-                                TextView tvProd = (TextView) findViewById(R.id.tvProductName);
-                                TextView tvWanIP = (TextView) findViewById(R.id.tvWanIP);
-                                tvWanIP.setText(strWanIP);
-                                // toolbar support
-
-                                if (strWanIP.length() > 0) {
-                                    //Wan is up
-                                   ImageButton ibWanStatus =  (ImageButton)findViewById(R.id.ibInternetStatus);
-                                    ibWanStatus.setImageResource(R.mipmap.internet_connected);
-                                }
-                                else {
-                                    ImageButton ibWanStatus =  (ImageButton)findViewById(R.id.ibInternetStatus);
-                                    ibWanStatus.setImageResource(R.mipmap.internet_no_connection);
-                                }
-
-                                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-                                toolbar.setTitle(/*strProdName + */" Connected");
-                                toolbar.setBackgroundColor(Color.rgb(0,200,0));
-
-                                TextView tvProductName = (TextView) findViewById(R.id.tvProductName);
-                                tvProductName.setText(strProdName);
-
-                               //Log.d("LIUYH", "body");
-                                //Log.d("LIUYH", result);
-                                refreshGateway();
-
-
-                                //Fragment fgStatus = (Fragment) fragmentManager.findFragmentById(R.id.id_content);
-                               // fgStatus.
-                                //fgStatus.updateHostsList();
-
-
+                                //refreshGateway();
+                                getHostFromResponse(result);
+                                statusTab.updateStatus(result);
+                                statusTab.updateHostsList();
                             }
                         });
 
